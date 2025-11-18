@@ -10,8 +10,13 @@ RUN apt-get update && apt-get install -y \
 # 2. Activar mod_rewrite de Apache (Necesario para Laravel)
 RUN a2enmod rewrite
 
-# 3. Configurar la raíz de Apache a la carpeta /public
+# 3. Configurar la raíz de Apache a la carpeta /public y habilitar .htaccess
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
+
+# Habilitar AllowOverride All en la configuración del sitio para que funcione .htaccess (SOLUCIONA EL ERROR 404)
+RUN sed -i 's/AllowOverride None/AllowOverride All/g' /etc/apache2/sites-available/000-default.conf
+
+# Apuntar el DocumentRoot a la carpeta public de Laravel
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
 
@@ -22,8 +27,8 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 COPY . .
 
-# 6. Instalar dependencias de Laravel y render
+# 6. Instalar dependencias de Laravel
 RUN composer install --no-dev --optimize-autoloader
 
-# 7. Dar permisos a las carpetas de almacenamiento
+# 7. Dar permisos a las carpetas de almacenamiento (Storage)
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
