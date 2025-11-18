@@ -99,7 +99,7 @@ return [
             'search_path' => 'rutas_up',
             
             // AQUI ESTA EL TRUCO NUEVO: Inyectamos el endpoint con punto y coma
-            'sslmode' => 'require;options=endpoint=ep-quiet-boat-aey45hpd',
+            'sslmode' => 'require;options=endpoint=ep-quiet-boat-aey45hpd-pooler',
         ],
 
         'sqlsrv' => [
