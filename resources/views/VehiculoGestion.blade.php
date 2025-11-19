@@ -5,223 +5,742 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Vehículos</title>
     
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Iconos (Bootstrap Icons funcionan bien con Tailwind) -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    
-    <!-- SweetAlert2 -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#2563eb', // blue-600
-                        primaryHover: '#1d4ed8', // blue-700
-                    }
-                }
-            }
-        }
-    </script>
-
     <style>
-        /* Animación suave para el modal */
-        .modal-transition {
-            transition: opacity 0.3s ease-out;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        /* Ocultar scrollbar cuando el modal está abierto */
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f9fafb;
+            color: #1f2937;
+            line-height: 1.5;
+        }
+
         body.modal-open {
             overflow: hidden;
         }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        /* Card Principal */
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+        }
+
+        /* Header */
+        .card-header {
+            background: #2563eb;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .card-header h5 {
+            color: white;
+            font-size: 1.125rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .badge {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            backdrop-filter: blur(8px);
+        }
+
+        /* Toolbar */
+        .toolbar {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            background: #f9fafb;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Buscador */
+        .search-wrapper {
+            position: relative;
+            flex: 1;
+            min-width: 250px;
+            max-width: 500px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            pointer-events: none;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.5rem 0.5rem 0.5rem 2.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        /* Botones */
+        .btn {
+            padding: 0.5rem 1.5rem;
+            border: none;
+            border-radius: 9999px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+
+        .btn-secondary:hover {
+            background: #f9fafb;
+        }
+
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-edit {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .btn-edit:hover {
+            background: #fde68a;
+        }
+
+        .btn-delete {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .btn-delete:hover {
+            background: #fecaca;
+        }
+
+        /* Tabla */
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f3f4f6;
+        }
+
+        thead th {
+            padding: 0.75rem 1.5rem;
+            text-align: left;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: #4b5563;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        thead th.text-center {
+            text-align: center;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #e5e7eb;
+            transition: background 0.2s;
+        }
+
+        tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        tbody td {
+            padding: 0.75rem 1.5rem;
+            font-size: 0.875rem;
+            color: #4b5563;
+        }
+
+        tbody td.text-center {
+            text-align: center;
+        }
+
+        .placa-badge {
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            border: 1px solid #bfdbfe;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            display: inline-block;
+        }
+
+        .anio-badge {
+            background: #f3f4f6;
+            color: #374151;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            display: inline-block;
+        }
+
+        .actions {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        /* Footer */
+        .card-footer {
+            background: white;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .pagination {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .pagination button {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.875rem;
+            background: white;
+            border: 1px solid #d1d5db;
+            color: #6b7280;
+            cursor: pointer;
+        }
+
+        .pagination button:first-child {
+            border-radius: 4px 0 0 4px;
+        }
+
+        .pagination button:last-child {
+            border-radius: 0 4px 4px 0;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background: #f9fafb;
+        }
+
+        .pagination button:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            display: none;
+        }
+
+        .modal-overlay.active {
+            display: block;
+        }
+
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-container {
+            position: fixed;
+            inset: 0;
+            z-index: 10;
+            overflow-y: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal-panel {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 672px;
+        }
+
+        .modal-header {
+            background: #2563eb;
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            color: white;
+            font-size: 1.125rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1.25rem;
+            padding: 0.25rem;
+            transition: color 0.2s;
+        }
+
+        .modal-close:hover {
+            color: #e5e7eb;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.25rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-group input:disabled,
+        .form-group select:disabled {
+            background: #f3f4f6;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .modal-footer {
+            background: #f9fafb;
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        /* Loading Spinner */
+        #loadingOverlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 60;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #loadingOverlay.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #e5e7eb;
+            border-top-color: #2563eb;
+            border-bottom-color: #2563eb;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Alert personalizado */
+        .custom-alert {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            padding: 1rem 1.5rem;
+            min-width: 300px;
+            z-index: 100;
+            display: none;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .custom-alert.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .custom-alert.success {
+            border-left: 4px solid #10b981;
+        }
+
+        .custom-alert.error {
+            border-left: 4px solid #ef4444;
+        }
+
+        .custom-alert.warning {
+            border-left: 4px solid #f59e0b;
+        }
+
+        /* Confirm Dialog */
+        .confirm-dialog {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .confirm-dialog.active {
+            display: flex;
+        }
+
+        .confirm-content {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .confirm-content h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #1f2937;
+        }
+
+        .confirm-content p {
+            color: #6b7280;
+            margin-bottom: 1.5rem;
+        }
+
+        .confirm-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-wrapper {
+                max-width: 100%;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .card-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .table-wrapper {
+                font-size: 0.75rem;
+            }
+
+            thead th,
+            tbody td {
+                padding: 0.5rem;
+            }
+        }
+
+        /* Iconos simples con símbolos */
+        .icon-car::before { content: "🚗"; }
+        .icon-search::before { content: "🔍"; }
+        .icon-plus::before { content: "+"; }
+        .icon-edit::before { content: "✎"; }
+        .icon-trash::before { content: "🗑"; }
+        .icon-close::before { content: "✕"; }
     </style>
 </head>
-<body class="bg-gray-50 font-sans text-gray-800">
+<body>
 
     <!-- Spinner de carga -->
-    <div id="loadingOverlay" class="fixed inset-0 bg-white bg-opacity-80 z-[60] hidden items-center justify-center">
-        <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-primary"></div>
+    <div id="loadingOverlay">
+        <div class="spinner"></div>
     </div>
 
-    <div class="container mx-auto px-4 py-8 max-w-7xl">
+    <!-- Alert personalizado -->
+    <div id="customAlert" class="custom-alert">
+        <div id="alertMessage"></div>
+    </div>
+
+    <!-- Confirm Dialog -->
+    <div id="confirmDialog" class="confirm-dialog">
+        <div class="confirm-content">
+            <h3 id="confirmTitle">Confirmar</h3>
+            <p id="confirmMessage">¿Estás seguro?</p>
+            <div class="confirm-actions">
+                <button class="btn btn-secondary" onclick="closeConfirm()">Cancelar</button>
+                <button class="btn btn-delete" id="confirmBtn">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
         
         <!-- Tarjeta Principal -->
-        <div class="bg-white shadow-lg rounded-xl overflow-hidden border border-gray-100">
+        <div class="card">
             
             <!-- Encabezado -->
-            <div class="bg-primary px-6 py-4 flex flex-col md:flex-row justify-between items-center">
-                <h5 class="text-white text-lg font-bold flex items-center mb-2 md:mb-0">
-                    <i class="bi bi-car-front-fill mr-3 text-xl"></i>
+            <div class="card-header">
+                <h5>
+                    <span></span>
                     Listado de Vehículos
                 </h5>
-                <span class="bg-white bg-opacity-20 text-white px-3 py-1 rounded-full text-sm font-medium backdrop-blur-sm" id="contadorRegistros">
-                    0 registros
-                </span>
+                <span class="badge" id="contadorRegistros">0 registros</span>
             </div>
 
             <!-- Barra de Herramientas -->
-            <div class="p-6 border-b border-gray-100 bg-gray-50">
-                <div class="flex flex-col md:flex-row gap-4 justify-between items-center">
-                    <!-- Buscador -->
-                    <div class="relative w-full md:w-1/2">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-                            <i class="bi bi-search"></i>
-                        </div>
-                        <input type="text" id="inputBuscador" 
-                            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow" 
-                            placeholder="Buscar por placa o serie...">
-                    </div>
-                    
-                    <!-- Botón Nuevo -->
-                    <div class="w-full md:w-auto">
-                        <button onclick="abrirModalCrear()" 
-                            class="w-full md:w-auto bg-primary hover:bg-primaryHover text-white font-medium py-2 px-6 rounded-full shadow-sm hover:shadow-md transition-all duration-300 flex items-center justify-center gap-2">
-                            <i class="bi bi-plus-lg text-lg"></i>
-                            Nuevo Vehículo
-                        </button>
-                    </div>
+            <div class="toolbar">
+                <!-- Buscador -->
+                <div class="search-wrapper">
+                    <span class="search-icon icon-search"></span>
+                    <input type="text" id="inputBuscador" class="search-input" placeholder="Buscar por placa o serie...">
                 </div>
+                
+                <!-- Botón Nuevo -->
+                <button onclick="abrirModalCrear()" class="btn btn-primary">
+                    <span class="icon-plus"></span>
+                    Nuevo Vehículo
+                </button>
             </div>
 
             <!-- Tabla -->
-            <div class="overflow-x-auto">
-                <table class="min-w-full leading-normal">
+            <div class="table-wrapper">
+                <table>
                     <thead>
-                        <tr class="bg-gray-100 text-gray-600 uppercase text-xs leading-normal">
-                            <th class="py-3 px-6 text-left font-bold">ID</th>
-                            <th class="py-3 px-6 text-left font-bold">Serie</th>
-                            <th class="py-3 px-6 text-left font-bold">Placa</th>
-                            <th class="py-3 px-6 text-left font-bold">Económico</th>
-                            <th class="py-3 px-6 text-left font-bold">Marca</th>
-                            <th class="py-3 px-6 text-left font-bold">Modelo</th>
-                            <th class="py-3 px-6 text-center font-bold">Año</th>
-                            <th class="py-3 px-6 text-center font-bold">Acciones</th>
+                        <tr>
+                            <th>ID</th>
+                            <th>Serie</th>
+                            <th>Placa</th>
+                            <th>Económico</th>
+                            <th>Marca</th>
+                            <th>Modelo</th>
+                            <th class="text-center">Año</th>
+                            <th class="text-center">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody id="tablaBody" class="text-gray-600 text-sm font-light">
+                    <tbody id="tablaBody">
                         <!-- Las filas se generan con JS aquí -->
                     </tbody>
                 </table>
             </div>
             
-            <!-- Paginación simple (Visual) -->
-            <div class="bg-white px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-                <span class="text-sm text-gray-500">Mostrando resultados</span>
-                <div class="inline-flex mt-2 xs:mt-0 gap-1">
-                    <!-- Botones visuales, funcionalidad dependerá de API paginada -->
-                    <button class="px-3 py-1 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-l hover:bg-gray-100" disabled>
-                        Anterior
-                    </button>
-                    <button class="px-3 py-1 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-r hover:bg-gray-100" disabled>
-                        Siguiente
-                    </button>
+            <!-- Paginación -->
+            <div class="card-footer">
+                <span style="font-size: 0.875rem; color: #6b7280;">Mostrando resultados</span>
+                <div class="pagination">
+                    <button disabled>Anterior</button>
+                    <button disabled>Siguiente</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- MODAL (Tailwind Custom Implementation) -->
-    <!-- Capa de fondo (Overlay) -->
-    <div id="modalVehiculo" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <!-- MODAL -->
+    <div id="modalVehiculo" class="modal-overlay">
         
-        <!-- Fondo oscuro -->
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity backdrop-blur-sm" onclick="cerrarModal()"></div>
+        <div class="modal-backdrop" onclick="cerrarModal()"></div>
 
-        <!-- Contenedor del Modal -->
-        <div class="fixed inset-0 z-10 overflow-y-auto">
-            <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+        <div class="modal-container">
+            <div class="modal-panel">
                 
-                <!-- Panel del Modal -->
-                <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl">
-                    
-                    <!-- Header del Modal -->
-                    <div class="bg-primary px-4 py-3 sm:px-6 flex justify-between items-center">
-                        <h3 class="text-lg font-semibold leading-6 text-white flex items-center gap-2" id="modalTitulo">
-                            <i class="bi bi-car-front"></i> Nuevo Vehículo
-                        </h3>
-                        <button type="button" onclick="cerrarModal()" class="text-white hover:text-gray-200 transition-colors focus:outline-none">
-                            <i class="bi bi-x-lg text-xl"></i>
-                        </button>
-                    </div>
+                <!-- Header del Modal -->
+                <div class="modal-header">
+                    <h3 id="modalTitulo">
+                        <span class="icon-car"></span> Nuevo Vehículo
+                    </h3>
+                    <button class="modal-close" onclick="cerrarModal()">
+                        <span class="icon-close"></span>
+                    </button>
+                </div>
 
-                    <!-- Body del Modal -->
-                    <div class="px-4 py-5 sm:p-6">
-                        <form id="formVehiculo">
-                            <input type="hidden" id="vehiculo_id">
-                            
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <!-- Serie -->
-                                <div>
-                                    <label for="num_serie" class="block text-sm font-medium text-gray-700 mb-1">Número de Serie</label>
-                                    <input type="text" id="num_serie" required pattern="[A-Z0-9\-]+" 
-                                        class="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-sm"
-                                        placeholder="Ej: ABC-12345">
-                                </div>
-
-                                <!-- Placa -->
-                                <div>
-                                    <label for="placa" class="block text-sm font-medium text-gray-700 mb-1">Placa</label>
-                                    <input type="text" id="placa" required 
-                                        class="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-sm"
-                                        placeholder="Ej: XYZ-999">
-                                </div>
-
-                                <!-- Económico -->
-                                <div>
-                                    <label for="num_economico" class="block text-sm font-medium text-gray-700 mb-1">Num. Económico</label>
-                                    <input type="text" id="num_economico" required 
-                                        class="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-sm">
-                                </div>
-
-                                <!-- Año -->
-                                <div>
-                                    <label for="anio" class="block text-sm font-medium text-gray-700 mb-1">Año</label>
-                                    <input type="number" id="anio" min="1900" max="2099" required 
-                                        class="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-sm">
-                                </div>
-
-                                <!-- Marca -->
-                                <div>
-                                    <label for="marca_id" class="block text-sm font-medium text-gray-700 mb-1">Marca</label>
-                                    <select id="marca_id" required onchange="cargarModelos(this.value)"
-                                        class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-sm">
-                                        <option value="">Seleccione Marca...</option>
-                                    </select>
-                                </div>
-
-                                <!-- Modelo -->
-                                <div>
-                                    <label for="modelo_id" class="block text-sm font-medium text-gray-700 mb-1">Modelo</label>
-                                    <select id="modelo_id" required disabled
-                                        class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-sm disabled:bg-gray-100 disabled:text-gray-400">
-                                        <option value="">Seleccione una marca primero</option>
-                                    </select>
-                                </div>
+                <!-- Body del Modal -->
+                <div class="modal-body">
+                    <form id="formVehiculo">
+                        <input type="hidden" id="vehiculo_id">
+                        
+                        <div class="form-grid">
+                            <!-- Serie -->
+                            <div class="form-group">
+                                <label for="num_serie">Número de Serie</label>
+                                <input type="text" id="num_serie" required pattern="[A-Z0-9\-]+" placeholder="Ej: ABC-12345">
                             </div>
-                        </form>
-                    </div>
 
-                    <!-- Footer del Modal -->
-                    <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 gap-2">
-                        <button type="button" onclick="guardarVehiculo()" 
-                            class="inline-flex w-full justify-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primaryHover sm:w-auto transition-colors">
-                            Guardar
-                        </button>
-                        <button type="button" onclick="cerrarModal()" 
-                            class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto transition-colors">
-                            Cancelar
-                        </button>
-                    </div>
+                            <!-- Placa -->
+                            <div class="form-group">
+                                <label for="placa">Placa</label>
+                                <input type="text" id="placa" required placeholder="Ej: XYZ-999">
+                            </div>
+
+                            <!-- Económico -->
+                            <div class="form-group">
+                                <label for="num_economico">Num. Económico</label>
+                                <input type="text" id="num_economico" required>
+                            </div>
+
+                            <!-- Año -->
+                            <div class="form-group">
+                                <label for="anio">Año</label>
+                                <input type="number" id="anio" min="1900" max="2099" required>
+                            </div>
+
+                            <!-- Marca -->
+                            <div class="form-group">
+                                <label for="marca_id">Marca</label>
+                                <select id="marca_id" required onchange="cargarModelos(this.value)">
+                                    <option value="">Seleccione Marca...</option>
+                                </select>
+                            </div>
+
+                            <!-- Modelo -->
+                            <div class="form-group">
+                                <label for="modelo_id">Modelo</label>
+                                <select id="modelo_id" required disabled>
+                                    <option value="">Seleccione una marca primero</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Footer del Modal -->
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+                    <button class="btn btn-primary" onclick="guardarVehiculo()">Guardar</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     <script>
         // ==========================================
         //  CONFIGURACIÓN DE APIs
@@ -231,13 +750,47 @@
         const API_URLS = {
             GET_VEHICULOS:   `${BASE_URL}/api/vehiculos`, 
             POST_VEHICULO:   `${BASE_URL}/api/vehiculos/store`, 
-            PUT_VEHICULO:    `${BASE_URL}/api/vehiculos/update`, // Se le concatenará /ID
-            DELETE_VEHICULO: `${BASE_URL}/api/vehiculos/delete`, // Se le concatenará /ID
-            
+            PUT_VEHICULO:    `${BASE_URL}/api/vehiculos/update`,
+            DELETE_VEHICULO: `${BASE_URL}/api/vehiculos/delete`,
             GET_MARCAS:      `${BASE_URL}/api/marcas`, 
-            
-            GET_MODELOS:     `${BASE_URL}/api/modelos/marca` // Se le concatenará /ID_MARCA
+            GET_MODELOS:     `${BASE_URL}/api/modelos/marca`
         };
+
+        // ==========================================
+        //  UTILIDADES DE ALERTA
+        // ==========================================
+        function showAlert(message, type = 'success') {
+            const alert = document.getElementById('customAlert');
+            const alertMessage = document.getElementById('alertMessage');
+            
+            alert.className = `custom-alert ${type} active`;
+            alertMessage.textContent = message;
+            
+            setTimeout(() => {
+                alert.classList.remove('active');
+            }, 3000);
+        }
+
+        function showConfirm(title, message, onConfirm) {
+            const dialog = document.getElementById('confirmDialog');
+            const confirmTitle = document.getElementById('confirmTitle');
+            const confirmMessage = document.getElementById('confirmMessage');
+            const confirmBtn = document.getElementById('confirmBtn');
+            
+            confirmTitle.textContent = title;
+            confirmMessage.textContent = message;
+            
+            dialog.classList.add('active');
+            
+            confirmBtn.onclick = () => {
+                closeConfirm();
+                onConfirm();
+            };
+        }
+
+        function closeConfirm() {
+            document.getElementById('confirmDialog').classList.remove('active');
+        }
 
         // ==========================================
         //  ESTADO GLOBAL Y UTILIDADES
@@ -252,30 +805,30 @@
         });
 
         // ==========================================
-        //  LOGICA DE MODAL (Tailwind)
+        //  LOGICA DE MODAL
         // ==========================================
         function abrirModal() {
-            modal.classList.remove('hidden');
+            modal.classList.add('active');
             document.body.classList.add('modal-open');
         }
 
         function cerrarModal() {
-            modal.classList.add('hidden');
+            modal.classList.remove('active');
             document.body.classList.remove('modal-open');
         }
 
         function abrirModalCrear() {
             document.getElementById('formVehiculo').reset();
             document.getElementById('vehiculo_id').value = "";
-            document.getElementById('modalTitulo').innerHTML = '<i class="bi bi-car-front"></i> Nuevo Vehículo';
+            document.getElementById('modalTitulo').innerHTML = '<span class="icon-car"></span> Nuevo Vehículo';
             document.getElementById('modelo_id').innerHTML = '<option value="">Seleccione una marca primero</option>';
             document.getElementById('modelo_id').disabled = true;
             abrirModal();
         }
 
         function abrirModalEditar(vehiculo) {
-            document.getElementById('modalTitulo').innerHTML = '<i class="bi bi-pencil-square"></i> Editar Vehículo';
-            document.getElementById('vehiculo_id').value = vehiculo.vehiculo_id; // Usamos vehiculo_id según tu backend Laravel
+            document.getElementById('modalTitulo').innerHTML = '<span class="icon-edit"></span> Editar Vehículo';
+            document.getElementById('vehiculo_id').value = vehiculo.vehiculo_id;
             
             document.getElementById('num_serie').value = vehiculo.num_serie;
             document.getElementById('placa').value = vehiculo.placa;
@@ -283,34 +836,29 @@
             document.getElementById('anio').value = vehiculo.anio;
             document.getElementById('marca_id').value = vehiculo.marca_id;
 
-            // Cargar modelos y preseleccionar
             cargarModelos(vehiculo.marca_id, vehiculo.modelo_id);
             abrirModal();
         }
 
         // ==========================================
-        //  FUNCIONES DE DATOS (CRUD REAL)
+        //  FUNCIONES DE DATOS (CRUD)
         // ==========================================
 
         async function cargarDatosDesdeAPI() {
-            loading.classList.remove('hidden');
-            loading.classList.add('flex');
+            loading.classList.add('active');
             try {
                 const response = await fetch(API_URLS.GET_VEHICULOS);
                 if (!response.ok) throw new Error('Error en la respuesta del servidor');
                 
                 const data = await response.json();
-                
-                // Ajuste por si tu API devuelve { data: [...] } o directamente [...]
                 listaVehiculos = Array.isArray(data) ? data : (data.data || []); 
                 
                 renderizarTabla();
             } catch (error) {
                 console.error("Error:", error);
-                Swal.fire('Error', 'No se pudieron cargar los vehículos. Verifica la conexión.', 'error');
+                showAlert('No se pudieron cargar los vehículos. Verifica la conexión.', 'error');
             } finally {
-                loading.classList.add('hidden');
-                loading.classList.remove('flex');
+                loading.classList.remove('active');
             }
         }
 
@@ -331,18 +879,15 @@
                 modelo_id: document.getElementById('modelo_id').value
             };
 
-            loading.classList.remove('hidden');
-            loading.classList.add('flex');
+            loading.classList.add('active');
             
             try {
                 let url, method;
 
                 if (id) {
-                    // EDITAR: PUT .../update/{id}
                     url = `${API_URLS.PUT_VEHICULO}/${id}`;
                     method = 'PUT';
                 } else {
-                    // CREAR: POST .../store
                     url = API_URLS.POST_VEHICULO;
                     method = 'POST';
                 }
@@ -361,41 +906,27 @@
                     throw new Error(errorData.message || 'Error al guardar');
                 }
 
-                await cargarDatosDesdeAPI(); // Recargar tabla
+                await cargarDatosDesdeAPI();
                 cerrarModal();
                 
-                Swal.fire({
-                    title: 'Éxito', 
-                    text: 'Operación realizada correctamente', 
-                    icon: 'success',
-                    confirmButtonColor: '#2563eb'
-                });
+                showAlert('Operación realizada correctamente', 'success');
 
             } catch (error) {
                 console.error("Error:", error);
-                Swal.fire('Error', error.message || 'Hubo un problema al guardar.', 'error');
+                showAlert(error.message || 'Hubo un problema al guardar.', 'error');
             } finally {
-                loading.classList.add('hidden');
-                loading.classList.remove('flex');
+                loading.classList.remove('active');
             }
         }
 
         function confirmarEliminar(id) {
-            Swal.fire({
-                title: '¿Eliminar vehículo?',
-                text: "No podrás revertir esto",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#ef4444', 
-                cancelButtonColor: '#6b7280',
-                confirmButtonText: 'Sí, eliminar'
-            }).then(async (result) => {
-                if (result.isConfirmed) {
-                    loading.classList.remove('hidden');
-                    loading.classList.add('flex');
+            showConfirm(
+                '¿Eliminar vehículo?',
+                'No podrás revertir esto',
+                async () => {
+                    loading.classList.add('active');
                     
                     try {
-                        // ELIMINAR: DELETE .../delete/{id}
                         const url = `${API_URLS.DELETE_VEHICULO}/${id}`;
                         
                         const response = await fetch(url, {
@@ -408,23 +939,16 @@
                         if (!response.ok) throw new Error('Error al eliminar');
 
                         await cargarDatosDesdeAPI();
-                        
-                        Swal.fire({
-                            title: 'Eliminado',
-                            text: 'El registro ha sido eliminado',
-                            icon: 'success',
-                            confirmButtonColor: '#2563eb'
-                        });
+                        showAlert('El registro ha sido eliminado', 'success');
 
                     } catch (error) {
                         console.error(error);
-                        Swal.fire('Error', 'No se pudo eliminar el registro', 'error');
+                        showAlert('No se pudo eliminar el registro', 'error');
                     } finally {
-                        loading.classList.add('hidden');
-                        loading.classList.remove('flex');
+                        loading.classList.remove('active');
                     }
                 }
-            });
+            );
         }
 
         // ==========================================
@@ -438,7 +962,6 @@
 
             tbody.innerHTML = '';
             
-            // Filtro client-side sobre los datos cargados
             const datosFiltrados = listaVehiculos.filter(item => 
                 (item.placa && String(item.placa).toLowerCase().includes(filtro)) || 
                 (item.num_serie && String(item.num_serie).toLowerCase().includes(filtro))
@@ -447,54 +970,52 @@
             contador.innerText = `${datosFiltrados.length} registros`;
 
             if(datosFiltrados.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-gray-400">No se encontraron datos</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:2rem;color:#9ca3af;">No se encontraron datos</td></tr>`;
                 return;
             }
 
             datosFiltrados.forEach(vehiculo => {
-                // Aseguramos que accedemos a las propiedades correctas, a veces vienen como objetos anidados
                 const nombreMarca = vehiculo.marca ? (vehiculo.marca.marca || vehiculo.marca.nombre || vehiculo.marca) : 'N/A';
                 const nombreModelo = vehiculo.modelo ? (vehiculo.modelo.modelo || vehiculo.modelo.nombre || vehiculo.modelo) : 'N/A';
 
-                const tr = `
-                    <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                        <td class="py-3 px-6 text-left whitespace-nowrap font-medium">${vehiculo.vehiculo_id || vehiculo.id}</td>
-                        <td class="py-3 px-6 text-left">${vehiculo.num_serie}</td>
-                        <td class="py-3 px-6 text-left">
-                            <span class="bg-blue-100 text-blue-800 py-1 px-3 rounded-full text-xs font-bold border border-blue-200 shadow-sm">
-                                ${vehiculo.placa}
-                            </span>
-                        </td>
-                        <td class="py-3 px-6 text-left text-gray-600">${vehiculo.num_economico}</td>
-                        <td class="py-3 px-6 text-left">${nombreMarca}</td>
-                        <td class="py-3 px-6 text-left">${nombreModelo}</td>
-                        <td class="py-3 px-6 text-center">
-                            <span class="bg-gray-100 text-gray-700 py-1 px-2 rounded text-xs">
-                                ${vehiculo.anio}
-                            </span>
-                        </td>
-                        <td class="py-3 px-6 text-center">
-                            <div class="flex item-center justify-center gap-2">
-                                <button onclick='abrirModalEditar(${JSON.stringify(vehiculo)})' 
-                                    class="w-8 h-8 rounded-full bg-yellow-100 text-yellow-600 hover:bg-yellow-200 flex items-center justify-center transition-colors" title="Editar">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                                <button onclick="confirmarEliminar(${vehiculo.vehiculo_id || vehiculo.id})" 
-                                    class="w-8 h-8 rounded-full bg-red-100 text-red-600 hover:bg-red-200 flex items-center justify-center transition-colors" title="Eliminar">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="font-weight:500;">${vehiculo.vehiculo_id || vehiculo.id}</td>
+                    <td>${vehiculo.num_serie}</td>
+                    <td>
+                        <span class="placa-badge">
+                            ${vehiculo.placa}
+                        </span>
+                    </td>
+                    <td>${vehiculo.num_economico}</td>
+                    <td>${nombreMarca}</td>
+                    <td>${nombreModelo}</td>
+                    <td class="text-center">
+                        <span class="anio-badge">
+                            ${vehiculo.anio}
+                        </span>
+                    </td>
+                    <td class="text-center">
+                        <div class="actions">
+                            <button onclick='abrirModalEditar(${JSON.stringify(vehiculo)})' 
+                                class="btn btn-icon btn-edit" title="Editar">
+                                <span class="icon-edit"></span>
+                            </button>
+                            <button onclick="confirmarEliminar(${vehiculo.vehiculo_id || vehiculo.id})" 
+                                class="btn btn-icon btn-delete" title="Eliminar">
+                                <span class="icon-trash"></span>
+                            </button>
+                        </div>
+                    </td>
                 `;
-                tbody.innerHTML += tr;
+                tbody.appendChild(tr);
             });
         }
 
         document.getElementById('inputBuscador').addEventListener('keyup', renderizarTabla);
 
         // ==========================================
-        //  CARGA DE COMBOS (API REAL)
+        //  CARGA DE COMBOS
         // ==========================================
 
         async function cargarMarcas() {
@@ -509,12 +1030,11 @@
                 select.innerHTML = '<option value="">Seleccione Marca...</option>';
                 
                 marcas.forEach(m => {
-                    // Ajusta 'marca_id' y 'marca' según devuelva tu backend
                     select.innerHTML += `<option value="${m.marca_id || m.id}">${m.marca || m.nombre}</option>`;
                 });
             } catch (e) { 
                 console.error("Error marcas", e); 
-                Swal.fire('Aviso', 'No se pudieron cargar las marcas', 'warning');
+                showAlert('No se pudieron cargar las marcas', 'warning');
             }
         }
 
@@ -522,17 +1042,14 @@
             const selectModelo = document.getElementById('modelo_id');
             selectModelo.innerHTML = '<option>Cargando...</option>';
             selectModelo.disabled = false;
-            selectModelo.classList.remove('disabled:bg-gray-100', 'disabled:text-gray-400');
 
             if (!marcaId) {
                  selectModelo.innerHTML = '<option value="">Seleccione una marca primero</option>';
                  selectModelo.disabled = true;
-                 selectModelo.classList.add('disabled:bg-gray-100', 'disabled:text-gray-400');
                  return;
             }
 
             try {
-                // Ruta: /api/modelos/marca/{marca_id}
                 const response = await fetch(`${API_URLS.GET_MODELOS}/${marcaId}`);
                 
                 if (!response.ok) throw new Error('Error cargando modelos');
