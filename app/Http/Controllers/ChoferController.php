@@ -64,4 +64,22 @@ class ChoferController extends Controller
 
         return $choferes;
      }
+
+     public function cambiarEstatus($id)
+{
+    $chofer = Chofer::find($id);
+
+    if (!$chofer) {
+        return response()->json(['message' => 'Chofer no encontrado'], 404);
+    }
+
+    // Alternar estatus (true ↔ false)
+    $chofer->estatus = !$chofer->estatus;
+    $chofer->save();
+
+    return response()->json([
+        'message' => 'Estatus actualizado con éxito',
+        'estatus' => $chofer->estatus
+    ], 200);
+}
 }

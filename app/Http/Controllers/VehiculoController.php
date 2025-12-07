@@ -47,4 +47,23 @@ class VehiculoController extends Controller
     {
         return view('map');
     }
+
+    public function cambiarEstatus($id)
+{
+    $vehiculo = Vehiculo::find($id);
+
+    if (!$vehiculo) {
+        return response()->json(['message' => 'Vehículo no encontrado'], 404);
+    }
+
+    // Alternar estatus (true ↔ false)
+    $vehiculo->estatus = !$vehiculo->estatus;
+    $vehiculo->save();
+
+    return response()->json([
+        'message' => 'Estatus actualizado con éxito',
+        'estatus' => $vehiculo->estatus
+    ], 200);
+}
+
 }

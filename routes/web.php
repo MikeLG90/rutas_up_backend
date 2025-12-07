@@ -71,6 +71,7 @@ Route::prefix('api/vehiculos')->group(function () {
     Route::put('/update/{id}', [VehiculoController::class, 'update']);
     Route::delete('/delete/{id}', [VehiculoController::class, 'destroy']);
 });
+Route::patch('vehiculos/{id}/estatus', [VehiculoController::class, 'cambiarEstatus']);
 
 // choferes
 Route::get('/api/choferes', [ChoferController::class, 'index']);
@@ -78,6 +79,8 @@ Route::get('/api/choferes/usuarios', [ChoferController::class, 'getChoferes']);
 Route::post('/api/choferes/store', [ChoferController::class, 'store']);
 Route::put('/api/choferes/update/{id}', [ChoferController::class, 'update']);
 Route::delete('/api/choferes/delete/{id}', [ChoferController::class, 'destroy']);
+Route::patch('choferes/{id}/estatus', [ChoferController::class, 'cambiarEstatus']);
+
 
 // rutas
 Route::get('/api/rutas', [RutaController::class, 'index']);
