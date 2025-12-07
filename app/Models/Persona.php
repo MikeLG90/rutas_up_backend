@@ -6,9 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Persona extends Model
 {
-    protected $table = 'personas'; // Nombre de la tabla en PostgreSQL
+    protected $table = 'personas';
 
     protected $primaryKey = 'persona_id';
+    protected $appends = ['nombre_completo'];
 
     protected $fillable = [
         'nombre',
@@ -21,5 +22,10 @@ class Persona extends Model
     public function usuario()
     {
         return $this->hasOne(User::class. 'persona_id');
+    }
+
+    protected function getNombreCompletoAttribute(): string
+    {
+        return trim($this->nombre . ' ' . $this->ap_paterno . ' ' . $this->ap_materno);
     }
 }

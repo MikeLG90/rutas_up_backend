@@ -9,6 +9,20 @@ use App\Http\Controllers\ChoferController;
 use App\Http\Controllers\RutaController;
 use App\Http\Controllers\AsignacionController;
 use App\Http\Controllers\RecuperarContrasenaController;
+use App\Http\Controllers\DocumentoController;
+
+Route::get('/api/documentos', [DocumentoController::class, 'index']);
+
+Route::post('/api/documentos', [DocumentoController::class, 'store']);
+
+Route::get('documentos/{documento}', [DocumentoController::class, 'show']);
+
+Route::put('documentos/{documento}', [DocumentoController::class, 'update']);
+Route::patch('documentos/{documento}', [DocumentoController::class, 'update']);
+
+Route::delete('documentos/{documento}', [DocumentoController::class, 'destroy']);
+
+Route::get('/api/documentos/{documento}/download', [DocumentoController::class, 'download']);
 
 Route::post('/api/solicitar-recuperacion', [RecuperarContrasenaController::class, 'solicitar']);
 Route::get('/api/recuperar-password', [RecuperarContrasenaController::class, 'vistaRecuperar']);

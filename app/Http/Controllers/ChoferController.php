@@ -20,7 +20,7 @@ class ChoferController extends Controller
             DB::raw("p.nombre || ' ' || p.ap_paterno || ' ' || p.ap_materno AS nombre_completo"),
             'c.licencia_conducir',
             'c.fecha_expiracion_licencia',
-            'c.estado',
+            'c.estatus',
             'c.fecha_ingreso',
             'c.observaciones'
         )

@@ -43,4 +43,9 @@ class Vehiculo extends Model
     {
         return $this->hasMany(Ubicacion::class, 'vehiculo_id');
     }
+
+    public function documentos(): MorphMany
+    {
+        return $this->morphMany(Documento::class, 'documentable');
+    }
 }
