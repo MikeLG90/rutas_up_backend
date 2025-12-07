@@ -17,7 +17,8 @@ class Vehiculo extends Model
         'num_economico',
         'marca_id',
         'modelo_id',
-        'anio'
+        'anio',
+        'estatus'
     ];
 
     protected $casts = [

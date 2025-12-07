@@ -18,7 +18,8 @@ class Chofer extends Model
         'vehiculo_id',
         'estado',
         'fecha_ingreso',
-        'observaciones'
+        'observaciones',
+        'estatus'
     ];
 
     protected $casts = [
