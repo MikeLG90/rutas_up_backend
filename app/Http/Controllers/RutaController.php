@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Ruta;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
 
 class RutaController extends Controller
 {
@@ -14,7 +16,7 @@ class RutaController extends Controller
      */
     public function index()
     {
-        $rutas = Ruta::all(); 
+        $rutas = DB::table('rutas')->get();
         return response()->json($rutas);  
     }
 

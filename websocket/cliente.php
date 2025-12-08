@@ -56,7 +56,7 @@ function mask($text) {
 }
 
 // ✅ SIMULACIÓN CON ID DE COMBI (SE RESPETA)
-$id_combi = 1;
+$id_combi = 482;
 $lat = 18.5481597;
 $lon = -88.2885141;
 $speed = 0;

@@ -14,6 +14,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.10.1",
         "opcodesio/log-viewer": "^3.18",
+        "rap2hpoutre/laravel-log-viewer": "^2.5",
         "twilio/sdk": "^8.6"
     },
     "require-dev": {

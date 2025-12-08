@@ -255,253 +255,208 @@
 
   <!-- Mapbox GL JS -->
   <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
-  <script>
-    const combiIconUrl = "{{ asset('images/combi.png') }}";
-    
-    mapboxgl.accessToken = 'pk.eyJ1IjoiZGFydGhzdGFyc2NyZWFtIiwiYSI6ImNtZGIxY2oxcTBxNWwybG9yeXBxbzd6NmoifQ.2mvR85hwUrywc0L8p7sf5Q';
-    
-    const map = new mapboxgl.Map({
-      container: 'map',
-      style: 'mapbox://styles/mapbox/streets-v12',
-      center: [-88.297, 18.501],
-      zoom: 15,
-      pitch: 60,
-      bearing: -20,
-      antialias: true
-    });
+<script>
+const combiIconUrl = "{{ asset('images/combi.png') }}";
 
-    
-    map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+mapboxgl.accessToken = 'pk.eyJ1IjoiZGFydGhzdGFyc2NyZWFtIiwiYSI6ImNtZGIxY2oxcTBxNWwybG9yeXBxbzd6NmoifQ.2mvR85hwUrywc0L8p7sf5Q';
 
-    
-
-
-    const markers = {};
-    const lastPositions = {};
-    const coloresPorRuta = {};
-
-    function getBearing(from, to) {
-      const lat1 = from[1] * Math.PI / 180;
-      const lat2 = to[1] * Math.PI / 180;
-      const deltaLon = (to[0] - from[0]) * Math.PI / 180;
-      const y = Math.sin(deltaLon) * Math.cos(lat2);
-      const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(deltaLon);
-      return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
-    }
-
-    // Toggle sidebar functionality
-    const sidebar = document.getElementById('sidebar');
-    const toggleBtn = document.getElementById('toggle-sidebar');
-    
-    toggleBtn.addEventListener('click', () => {
-      sidebar.classList.toggle('hidden');
-      toggleBtn.classList.toggle('sidebar-hidden');
-      toggleBtn.innerHTML = sidebar.classList.contains('hidden') ? '☰' : '✕';
-    });
-
-    const socket = new WebSocket('wss://rutasws-f6hhc6bmekbbekfe.mexicocentral-01.azurewebsites.net/');
-    socket.onopen = () => console.log('WebSocket conectado');
-    socket.onerror = (error) => console.error('Error en WebSocket:', error);
-    
-    socket.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        const id = data.id_combi;
-        if (!id || !data.latitude || !data.longitude) return;
-
-        const lngLat = [data.longitude, data.latitude];
-
-        if (!markers[id]) {
-          const el = document.createElement('img');
-          el.src = combiIconUrl;
-          el.style.width = '40px';
-          el.style.height = '40px';
-          el.style.transition = 'transform 0.3s ease';
-          el.style.transformOrigin = 'center';
-          el.style.filter = 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))';
-
-          const marker = new mapboxgl.Marker(el).setLngLat(lngLat).addTo(map);
-          const popup = new mapboxgl.Popup({ offset: 25 }).setText('Esperando datos...');
-          marker.setPopup(popup);
-
-          el.addEventListener('click', () => {
-            popup.isOpen() ? popup.remove() : popup.addTo(map);
-          });
-
-          markers[id] = { marker, popup, el };
-          lastPositions[id] = lngLat;
-        } else {
-          const markerObj = markers[id];
-          const from = lastPositions[id];
-          const to = lngLat;
-          const bearing = getBearing(from, to);
-
-          markerObj.el.style.transform = `rotate(${bearing}deg)`;
-          markerObj.marker.setLngLat(to);
-          lastPositions[id] = to;
-
-          const info = `
-            <div style="padding: 5px;">
-              <strong style="color: #2c3e50;">🚌 Vehículo ID: ${id}</strong><br/>
-              <small style="color: #7f8c8d;">
-                📍 Lat: ${data.latitude.toFixed(6)}<br/>
-                📍 Lng: ${data.longitude.toFixed(6)}<br/>
-                🚀 Velocidad: ${data.speed} km/h<br/>
-                🕒 Hora: ${new Date(data.timestamp).toLocaleTimeString()}
-              </small>
-            </div>
-          `;
-          markerObj.popup.setHTML(info);
-        }
-      } catch (e) {
-        console.warn('Mensaje no válido:', event.data);
-      }
-    };
-
-    document.getElementById('reset-3d').addEventListener('click', () => {
-      map.easeTo({
-        pitch: 60,
-        bearing: -20,
-        duration: 1000
-      });
-    });
-
-    function colorAleatorio() {
-      const colores = [
-        '#e74c3c', '#3498db', '#2ecc71', '#f39c12', 
-        '#9b59b6', '#1abc9c', '#e67e22', '#34495e'
-      ];
-      return colores[Math.floor(Math.random() * colores.length)];
-    }
-
-    async function trazarRutaConCalles(puntos, nombre, color = '#007cbf', id = 'ruta') {
-      if (puntos.length < 2) {
-        console.warn('Se necesitan al menos 2 puntos para trazar una ruta.');
-        return;
-      }
-
-      const coordsStr = puntos.map(p => p.join(',')).join(';');
-      const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${coordsStr}?geometries=geojson&access_token=${mapboxgl.accessToken}`;
-
-      try {
-        const res = await fetch(url);
-        const data = await res.json();
-        
-        if (!data.routes || !data.routes[0]) {
-          console.error("No se pudo obtener una ruta de calles.");
-          return;
-        }
-
-        const routeCoords = data.routes[0].geometry.coordinates;
-        const sourceId = `route-${id}`;
-        const layerId = `route-${id}`;
-
-        if (map.getSource(sourceId)) {
-          map.removeLayer(layerId);
-          map.removeSource(sourceId);
-        }
-
-        map.addSource(sourceId, {
-          type: 'geojson',
-          data: {
-            type: 'Feature',
-            geometry: {
-              type: 'LineString',
-              coordinates: routeCoords
-            }
-          }
-        });
-
-        map.addLayer({
-          id: layerId,
-          type: 'line',
-          source: sourceId,
-          layout: {
-            'line-join': 'round',
-            'line-cap': 'round'
-          },
-          paint: {
-            'line-color': color,
-            'line-width': 5,
-            'line-opacity': 0.8
-          }
-        });
-
-        const bounds = new mapboxgl.LngLatBounds();
-        routeCoords.forEach(coord => bounds.extend(coord));
-        map.fitBounds(bounds, { padding: 80 });
-
-        const midPoint = routeCoords[Math.floor(routeCoords.length / 2)];
-        new mapboxgl.Popup({ closeButton: false })
-          .setLngLat(midPoint)
-          .setHTML(`<div style="padding: 8px; text-align: center;"><strong style="color: ${color};">🚌 ${nombre}</strong></div>`)
-          .addTo(map);
-      } catch (e) {
-        console.error("Error al trazar ruta con calles:", e);
-      }
-    }
-
-    map.on('style.load', () => {
-      map.addSource('mapbox-dem', {
-        type: "raster-dem",
-        url: "mapbox://mapbox.terrain-rgb",
-        tileSize: 512,
-        maxzoom: 14
-      });
-      map.setTerrain({ source: 'mapbox-dem', exaggeration: 1.5 });
-
-      map.addLayer({
-  id: '3d-buildings',
-  source: 'composite',
-  'source-layer': 'building',
-  filter: ['==', 'extrude', 'true'],
-  type: 'fill-extrusion',
-  minzoom: 15,
-  paint: {
-    'fill-extrusion-color': '#aaa',
-    'fill-extrusion-height': ['get', 'height'],
-    'fill-extrusion-base': ['get', 'min_height'],
-    'fill-extrusion-opacity': 0.6
-  }
+const map = new mapboxgl.Map({
+  container: 'map',
+  style: 'mapbox://styles/mapbox/streets-v12',
+  center: [-88.297, 18.501],
+  zoom: 15,
+  pitch: 60,
+  bearing: -20,
+  antialias: true
 });
 
-      // Cargar rutas del backend
-      fetch('https://rutas-up-backend.onrender.com/api/rutas')
-        .then(res => res.json())
-        .then(rutas => {
-          const contenedor = document.getElementById('lista-rutas');
-          rutas.forEach((ruta, index) => {
-            const color = colorAleatorio();
-            coloresPorRuta[ruta.ruta_id] = color;
+map.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
-            const div = document.createElement('div');
-            div.className = 'ruta-item';
-            div.style.borderColor = color;
-            div.style.animationDelay = `${index * 0.1}s`;
-            div.innerHTML = `
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <div style="width: 12px; height: 12px; background: ${color}; border-radius: 50%; flex-shrink: 0;"></div>
-                <span>${ruta.nombre_ruta}</span>
-              </div>
-            `;
-            
-            div.onclick = () => {
-              try {
-                const puntos = ruta.puntos_geograficos.split('|').map(p => {
-                  const [lat, lng] = p.trim().split(',').map(Number);
-                  return [lng, lat];
-                });
-                trazarRutaConCalles(puntos, ruta.nombre_ruta, color, ruta.ruta_id);
-              } catch (e) {
-                console.error('Error al procesar puntos de ruta:', e);
-              }
-            };
-            
-            contenedor.appendChild(div);
-          });
-        })
-        .catch(err => console.error('Error cargando rutas:', err));
-    });
-  </script>
+const markers = {};
+const lastPositions = {};
+const coloresPorRuta = {};
+
+function getBearing(from, to) {
+  const lat1 = from[1] * Math.PI / 180;
+  const lat2 = to[1] * Math.PI / 180;
+  const deltaLon = (to[0] - from[0]) * Math.PI / 180;
+  const y = Math.sin(deltaLon) * Math.cos(lat2);
+  const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(deltaLon);
+  const bearing = (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+  return isNaN(bearing) ? 0 : bearing;
+}
+
+// Sidebar toggle
+const sidebar = document.getElementById('sidebar');
+const toggleBtn = document.getElementById('toggle-sidebar');
+toggleBtn.addEventListener('click', () => {
+  sidebar.classList.toggle('hidden');
+  toggleBtn.classList.toggle('sidebar-hidden');
+  toggleBtn.innerHTML = sidebar.classList.contains('hidden') ? '☰' : '✕';
+});
+
+// WebSocket
+const socket = new WebSocket('wss://rutasws-f6hhc6bmekbbekfe.mexicocentral-01.azurewebsites.net/');
+socket.onopen = () => console.log('WebSocket conectado');
+socket.onerror = (error) => console.error('Error en WebSocket:', error);
+
+socket.onmessage = (event) => {
+  console.log('Mensaje recibido del WebSocket:', event.data);
+
+  try {
+    const data = JSON.parse(event.data);
+    console.log('Datos parseados:', data);
+
+    // Mensajes de tipo stats
+    if (data.type === 'stats' && Array.isArray(data.lastMessages)) {
+      data.lastMessages.forEach(msg => procesarMensajeCombi(msg));
+    }
+    // Mensajes individuales
+    else if (data.id_combi != null && data.latitude != null && data.longitude != null) {
+      procesarMensajeCombi(data);
+    } else {
+      console.warn('Datos incompletos o tipo desconocido, se ignoran:', data);
+    }
+  } catch (e) {
+    console.error('Error parseando mensaje WebSocket:', e, 'Datos:', event.data);
+  }
+};
+
+function procesarMensajeCombi(data) {
+  const id = data.id_combi;
+  const lngLat = [data.longitude, data.latitude];
+  console.log('Actualizar marker:', id, lngLat);
+
+  if (!markers[id]) {
+    console.log('Creando nuevo marker para ID:', id);
+    const el = document.createElement('img');
+    el.src = combiIconUrl;
+    el.style.width = '40px';
+    el.style.height = '40px';
+    el.style.transition = 'transform 0.3s ease';
+    el.style.transformOrigin = 'center';
+    el.style.filter = 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))';
+
+    const marker = new mapboxgl.Marker(el).setLngLat(lngLat).addTo(map);
+    const popup = new mapboxgl.Popup({ offset: 25 }).setText('Esperando datos...');
+    marker.setPopup(popup);
+
+    el.addEventListener('click', () => popup.isOpen() ? popup.remove() : popup.addTo(map));
+
+    markers[id] = { marker, popup, el };
+    lastPositions[id] = lngLat;
+  } else {
+    const markerObj = markers[id];
+    const from = lastPositions[id];
+    const to = lngLat;
+    const bearing = getBearing(from, to);
+
+    markerObj.el.style.transform = `rotate(${bearing}deg)`;
+    markerObj.marker.setLngLat(to);
+    lastPositions[id] = to;
+
+    const info = `
+      <div style="padding: 5px;">
+        <strong>Vehículo ID: ${id}</strong><br/>
+        <small>
+          Lat: ${data.latitude.toFixed(6)}<br/>
+          Lng: ${data.longitude.toFixed(6)}<br/>
+          Velocidad: ${data.speed} km/h<br/>
+          Hora: ${new Date(data.timestamp).toLocaleTimeString()}
+        </small>
+      </div>
+    `;
+    markerObj.popup.setHTML(info);
+  }
+}
+
+// Reset 3D
+document.getElementById('reset-3d').addEventListener('click', () => {
+  map.easeTo({ pitch: 60, bearing: -20, duration: 1000 });
+});
+
+function colorAleatorio() {
+  const colores = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12','#9b59b6','#1abc9c','#e67e22','#34495e'];
+  return colores[Math.floor(Math.random() * colores.length)];
+}
+
+// Función de trazar rutas
+async function trazarRutaConCalles(puntos, nombre, color = '#007cbf', id = 'ruta') {
+  console.log('Trazando ruta:', nombre, 'Puntos:', puntos);
+  if (puntos.length < 2) { console.warn('Se necesitan al menos 2 puntos.'); return; }
+
+  const coordsStr = puntos.map(p => p.join(',')).join(';');
+  const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${coordsStr}?geometries=geojson&access_token=${mapboxgl.accessToken}`;
+
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    console.log('Datos de la ruta recibidos:', data);
+
+    if (!data.routes || !data.routes[0]) { console.error('No se pudo obtener ruta.'); return; }
+
+    const routeCoords = data.routes[0].geometry.coordinates;
+    const sourceId = `route-${id}`;
+    const layerId = `route-${id}`;
+
+    if (map.getSource(sourceId)) { map.removeLayer(layerId); map.removeSource(sourceId); }
+
+    map.addSource(sourceId, { type: 'geojson', data: { type:'Feature', geometry: { type:'LineString', coordinates: routeCoords } } });
+    map.addLayer({ id: layerId, type:'line', source:sourceId, layout:{'line-join':'round','line-cap':'round'}, paint:{'line-color':color,'line-width':5,'line-opacity':0.8} });
+
+    const bounds = new mapboxgl.LngLatBounds();
+    routeCoords.forEach(coord => bounds.extend(coord));
+    map.fitBounds(bounds, { padding: 80 });
+
+    const midPoint = routeCoords[Math.floor(routeCoords.length / 2)];
+    new mapboxgl.Popup({ closeButton: false }).setLngLat(midPoint)
+      .setHTML(`<div style="padding: 8px; text-align: center;"><strong style="color: ${color};">${nombre}</strong></div>`).addTo(map);
+  } catch(e) {
+    console.error('Error trazar ruta:', e);
+  }
+}
+
+map.on('style.load', () => {
+  console.log('Mapbox style cargado');
+
+  map.addSource('mapbox-dem', { type: "raster-dem", url:"mapbox://mapbox.terrain-rgb", tileSize:512, maxzoom:14 });
+  map.setTerrain({ source: 'mapbox-dem', exaggeration:1.5 });
+
+  map.addLayer({
+    id:'3d-buildings', source:'composite', 'source-layer':'building', filter:['==','extrude','true'], type:'fill-extrusion',
+    minzoom:15, paint:{'fill-extrusion-color':'#aaa','fill-extrusion-height':['get','height'],'fill-extrusion-base':['get','min_height'],'fill-extrusion-opacity':0.6}
+  });
+
+  // Cargar rutas
+  fetch('https://rutas-up-backend.onrender.com/api/rutas')
+    .then(res=>res.json())
+    .then(rutas=>{
+      console.log('Rutas cargadas:', rutas);
+      const contenedor=document.getElementById('lista-rutas');
+      rutas.forEach((ruta,index)=>{
+        const color = colorAleatorio();
+        coloresPorRuta[ruta.ruta_id] = color;
+
+        const div=document.createElement('div');
+        div.className='ruta-item';
+        div.style.borderColor=color;
+        div.style.animationDelay=`${index*0.1}s`;
+        div.innerHTML=`<div style="display:flex;align-items:center;gap:8px;"><div style="width:12px;height:12px;background:${color};border-radius:50%;flex-shrink:0;"></div><span>${ruta.nombre_ruta}</span></div>`;
+        div.onclick=()=>{
+          try {
+            const puntos=ruta.puntos_geograficos.split('|').map(p=>{
+              const [lat,lng]=p.trim().split(',').map(Number);
+              return [lng,lat];
+            });
+            trazarRutaConCalles(puntos,ruta.nombre_ruta,color,ruta.ruta_id);
+          } catch(e){console.error('Error procesando puntos de ruta:',e);}
+        };
+        contenedor.appendChild(div);
+      });
+    })
+    .catch(err=>console.error('Error cargando rutas:', err));
+});
+</script>
+
 </body>
 </html>
