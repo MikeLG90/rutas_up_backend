@@ -73,4 +73,16 @@ public function download(Documento $documento)
 
     return Storage::disk('public')->download($documento->ruta_archivo, $nombre_descarga);
 }
+
+    // traer doc para poder mostrarlo
+    public function view(Documento $documento) 
+    {
+        // valdiar si esta
+        if(is_null($documento->ruta_archivo) || !Storage::disk('public')->exists($documento->ruta_archivo)) {
+            return response()->json(['message' => 'Archivo no encontrado o ruta nula'], 404);
+        }
+
+        // traer si existe
+        return Storage::disk('public')->response($documento->ruta_archivo);
+    }
 }
