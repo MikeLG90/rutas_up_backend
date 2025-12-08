@@ -37,6 +37,10 @@ Route::get('/map', function () {
     return view('map');
 });
 
+Route::get('/cam', function () {
+    return view('cam');
+});
+
 Route::get('/vehiculo-gestion', function () {
     return view('VehiculoGestion');
 });
