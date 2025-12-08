@@ -387,7 +387,7 @@
                     
                     var distanciaInput = document.getElementById('distancia-input');
                     if (distanciaInput) {
-                        distanciaInput.value = distanciaEnKm.toFixed(2) + ' km';
+                        distanciaInput.value = distanciaEnKm.toFixed(2);
                     }
                 });
             }
