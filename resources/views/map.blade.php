@@ -299,7 +299,7 @@
       toggleBtn.innerHTML = sidebar.classList.contains('hidden') ? '☰' : '✕';
     });
 
-    const socket = new WebSocket('ws://localhost:8080');
+    const socket = new WebSocket('wss://rutasws-f6hhc6bmekbbekfe.mexicocentral-01.azurewebsites.net/');
     socket.onopen = () => console.log('WebSocket conectado');
     socket.onerror = (error) => console.error('Error en WebSocket:', error);
     
@@ -466,7 +466,7 @@
 });
 
       // Cargar rutas del backend
-      fetch('http://localhost/api/rutas')
+      fetch('https://rutas-up-backend.onrender.com/api/rutas')
         .then(res => res.json())
         .then(rutas => {
           const contenedor = document.getElementById('lista-rutas');

@@ -21,7 +21,7 @@ Route::patch('documentos/{documento}', [DocumentoController::class, 'update']);
 Route::delete('documentos/{documento}', [DocumentoController::class, 'destroy']);
 Route::get('/api/documentos/{documento}/download', [DocumentoController::class, 'download']);
 
-Route::get('documentos/{documento}/view', [DocumentoController::class, 'view']);
+Route::get('/api/documentos/{documento}/view', [DocumentoController::class, 'view']);
 
 
 Route::post('/api/solicitar-recuperacion', [RecuperarContrasenaController::class, 'solicitar']);
