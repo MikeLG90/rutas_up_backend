@@ -313,7 +313,7 @@
                     draggable: true // Hacer los marcadores arrastrables para mejor UX
                 }).addTo(map);
                 
-                markers.push(marker); // Guardar marcador en el array
+                markers.push(marker);
                 markerCount.textContent = markers.length;
                 marker.bindPopup(`Parada ${markers.length}`).openPopup();
                 
