@@ -230,47 +230,7 @@
                 </div>
             </div>
 
-            <div class="vehicle-card" id="card-combi-2">
-                <div class="card-header">
-                    <span class="vehicle-name">Combi 2</span>
-                    <span class="status-indicator status-connected">Activo</span>
-                </div>
-                <div class="card-body">
-                    <div class="info-row">
-                        <span class="info-label">Velocidad</span>
-                        <span class="info-value">45 km/h</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Ubicación</span>
-                        <span class="info-value">Av. Principal</span>
-                    </div>
-                </div>
-                <div class="people-counter">
-                    <span id="people-count-combi-2" class="count-number">12</span>
-                    <span class="count-label">Personas Detectadas</span>
-                </div>
-            </div>
 
-            <div class="vehicle-card" id="card-combi-3">
-                <div class="card-header">
-                    <span class="vehicle-name">Combi 3</span>
-                    <span class="status-indicator status-connected">Activo</span>
-                </div>
-                <div class="card-body">
-                    <div class="info-row">
-                        <span class="info-label">Velocidad</span>
-                        <span class="info-value">20 km/h</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Ubicación</span>
-                        <span class="info-value">Terminal de Buses</span>
-                    </div>
-                </div>
-                <div class="people-counter">
-                    <span id="people-count-combi-3" class="count-number">5</span>
-                    <span class="count-label">Personas Detectadas</span>
-                </div>
-            </div>
             
         </div>
     </div>
